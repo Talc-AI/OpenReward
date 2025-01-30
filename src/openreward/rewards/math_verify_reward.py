@@ -40,8 +40,10 @@ class MathVerifyReward(Reward):
             return None
 
         text = chat.messages[-1].content
+        answer = self._regex.findall(text)[-1]
+
         try:
-            parsed = parse(text)
+            parsed = parse(answer)
         except:
             return 0.0
         return 1.0 if verify(parsed) else self.config.valid_expression_reward
