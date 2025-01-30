@@ -27,3 +27,9 @@ A: For now, just write the reward functions and let the user decide which ones t
 
 Q: Is there a chat format we should use for the inputs to the reward function?
 A: We should use the messages/chat format from the OpenAI API.
+
+## Compatibility
+
+OpenReward has built in support to integrate nicely with the following projects:
+ - [ ] TinyZero
+ - [ ] Huggingface TRL GRPO/open-r1

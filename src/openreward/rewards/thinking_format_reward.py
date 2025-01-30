@@ -2,10 +2,11 @@ import re
 from typing import Any, Literal
 from pydantic import BaseModel
 
+from openreward.rewards.reward import RewardConfig, Reward
 from openreward.types.chat import Chat, parse_chat
 
 
-class ThinkingFormatRewardConfig(BaseModel):
+class ThinkingFormatRewardConfig(RewardConfig):
     """Configuration for the ThinkingFormatReward class."""
 
     type: Literal["ThinkingFormat"] = "ThinkingFormat"
@@ -13,11 +14,13 @@ class ThinkingFormatRewardConfig(BaseModel):
     override_regex: str | None = None
 
 
-class ThinkingFormatReward:
+class ThinkingFormatReward(Reward):
     """Ensures that the model generates outputs that conform to the <thinking></thinking><answer></answer> format."""
 
     def __init__(self, config: ThinkingFormatRewardConfig):
         """Initializes the ThinkingFormatReward class. Defaults to the format <thinking></thinking><answer></answer>. override_regex is a regular expression that can be used to override the default thinking format with a custom format."""
+        super().__init__(config)
+
         if config.override_regex is None:
             override_regex = r"<thinking>(.*?)</thinking><answer>(.*?)</answer>"
         else:

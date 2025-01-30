@@ -4,15 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "Max Kerr", email = "maxrmk@gmail.com" }
+    { name = "Max Kerr", email = "max@talc.ai" }
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "math-verify>=0.3.3",
     "pydantic>=2.10.6",
+    "sympy>=1.13.3",
 ]
-
-[project.scripts]
-openreward = "openreward:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,9 +1,9 @@
 import unittest
-from openreward.thinking_format_reward import (
+from openreward.rewards.thinking_format_reward import (
     ThinkingFormatReward,
     ThinkingFormatRewardConfig,
 )
-from openreward.types.chat import Chat, Message
+from openreward.types.chat import Chat, ChatCompletion
 
 
 class TestThinkingFormatReward(unittest.TestCase):
@@ -18,8 +18,8 @@ class TestThinkingFormatReward(unittest.TestCase):
         reward = ThinkingFormatReward(self.default_config)
         chat = Chat(
             messages=[
-                Message(role="user", content="What is the capital of France?"),
-                Message(
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
                     role="assistant",
                     content="<thinking>Let me think...</thinking><answer>Paris</answer>",
                 ),
@@ -31,8 +31,10 @@ class TestThinkingFormatReward(unittest.TestCase):
         reward = ThinkingFormatReward(self.default_config)
         chat = Chat(
             messages=[
-                Message(role="user", content="What is the capital of France?"),
-                Message(role="assistant", content="The capital of France is Paris."),
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
+                    role="assistant", content="The capital of France is Paris."
+                ),
             ]
         )
         self.assertEqual(reward(chat), 0.0)
@@ -41,8 +43,8 @@ class TestThinkingFormatReward(unittest.TestCase):
         reward = ThinkingFormatReward(self.custom_config)
         chat = Chat(
             messages=[
-                Message(role="user", content="What is the capital of France?"),
-                Message(
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
                     role="assistant",
                     content="<thought>Let me think...</thought><response>Paris</response>",
                 ),
@@ -54,8 +56,8 @@ class TestThinkingFormatReward(unittest.TestCase):
         reward = ThinkingFormatReward(self.custom_config)
         chat = Chat(
             messages=[
-                Message(role="user", content="What is the capital of France?"),
-                Message(
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
                     role="assistant",
                     content="<thinking>Let me think...</thinking><answer>Paris</answer>",
                 ),
@@ -66,7 +68,9 @@ class TestThinkingFormatReward(unittest.TestCase):
     def test_insufficient_messages(self):
         reward = ThinkingFormatReward(self.default_config)
         chat = Chat(
-            messages=[Message(role="user", content="What is the capital of France?")]
+            messages=[
+                ChatCompletion(role="user", content="What is the capital of France?")
+            ]
         )
         self.assertIsNone(reward(chat))
 
@@ -74,8 +78,8 @@ class TestThinkingFormatReward(unittest.TestCase):
         reward = ThinkingFormatReward(self.default_config)
         chat = Chat(
             messages=[
-                Message(role="user", content="What is the capital of France?"),
-                Message(
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
                     role="user",
                     content="Actually, I meant to ask about the capital of Germany.",
                 ),
