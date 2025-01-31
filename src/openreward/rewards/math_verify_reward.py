@@ -29,6 +29,8 @@ class MathVerifyReward(Reward):
         if config.extraction_regex is None:
             # Extract between the last set of <answer> and </answer> tags
             extraction_regex = r"<answer>(.*?)</answer>"
+        else:
+            extraction_regex = config.extraction_regex
 
         self._regex = re.compile(extraction_regex)
 
