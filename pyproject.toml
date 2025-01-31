@@ -6,11 +6,20 @@ readme = "README.md"
 authors = [
     { name = "Max Kerr", email = "max@talc.ai" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "math-verify>=0.3.3",
     "pydantic>=2.10.6",
     "sympy>=1.13.3",
+]
+
+[project.optional-dependencies]
+trl = [
+  "trl>=0.14.0",
+  "peft>=0.14.0",
+]
+skypilot = [
+    "skypilot[gcp]>=0.7.0",
 ]
 
 [build-system]

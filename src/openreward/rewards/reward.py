@@ -3,7 +3,7 @@ from typing import Any, Literal, Union
 from pydantic import BaseModel
 
 
-class RewardConfig(BaseModel):
+class RewardConfig(BaseModel, extra="allow"):
     """Base configuration for reward classes."""
 
     type: str
@@ -18,3 +18,9 @@ class Reward(ABC):
     @abstractmethod
     def __call__(self, chat: Any) -> float | None:
         pass
+
+    def has_dataset(self) -> bool:
+        return False
+
+    def get_dataset(self) -> list:
+        return None

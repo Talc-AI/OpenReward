@@ -1,0 +1,17 @@
+envs:
+  WANDB_API_KEY:
+  HF_TOKEN:
+
+resources:
+  accelerators: L4:8
+
+workdir: ../../../..
+
+setup: |
+  pip install '.[trl]'
+  pip install wandb
+  pip install flash-attn
+  pip install vllm
+
+run: |
+  accelerate launch --multi_gpu --num_processes 8 src/openreward/examples/trl_grpo/trl_grpo.py
