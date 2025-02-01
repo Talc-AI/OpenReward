@@ -24,7 +24,7 @@ def to_trl(
 
     def trl_reward_func(prompts, completions, answer, **kwargs) -> list[float]:
         responses = [completion[0]["content"] for completion in completions]
-        prompts = [prompts[-1] for prompt in prompts]
+        prompts = [prompt[-1]["content"] for prompt in prompts]
 
         chats = [
             Chat(
@@ -32,11 +32,24 @@ def to_trl(
                     ChatCompletion(role="user", content=prompt),
                     ChatCompletion(role="assistant", content=response),
                 ],
-                metadata={"ground_truth": answer},
+                metadata={"ground_truth": gt},
             )
-            for prompt, response in zip(prompts, responses)
+            for prompt, response, gt in zip(prompts, responses, answer)
         ]
 
-        return [reward(chat) for chat in chats]
+        rewards = [reward(chat) for chat in chats]
+
+        rewards = [reward if reward is not None else 0.0 for reward in rewards]
+
+        for i in range(len(rewards)):
+            print(
+                "-" * 20,
+                f"Prompt:\n{prompts[i]}",
+                f"\nAnswer:\n{answer[i]}",
+                f"\nResponse:\n{responses[i]}",
+                f"\nReward:\n{rewards[i]}",
+            )
+
+        return rewards
 
     return trl_reward_func

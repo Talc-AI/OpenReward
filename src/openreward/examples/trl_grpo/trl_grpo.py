@@ -15,6 +15,7 @@ from openreward.rewards.thinking_format_reward import (
     ThinkingFormatReward,
     ThinkingFormatRewardConfig,
 )
+from openreward.rewards.composite_reward import CompositeReward, CompositeRewardConfig
 from openreward.integrations.trl import to_trl
 
 # Load and prep dataset
@@ -80,62 +81,23 @@ def get_gsm8k_questions(split="train") -> Dataset:
 
 dataset = get_gsm8k_questions()
 
+eval_dataset = get_gsm8k_questions("test")
 
-# # Reward functions
-# def correctness_reward_func(prompts, completions, answer, **kwargs) -> list[float]:
-#     responses = [completion[0]["content"] for completion in completions]
-#     q = prompts[0][-1]["content"]
-#     extracted_responses = [extract_xml_answer(r) for r in responses]
-#     print(
-#         "-" * 20,
-#         f"Question:\n{q}",
-#         f"\nAnswer:\n{answer[0]}",
-#         f"\nResponse:\n{responses[0]}",
-#         f"\nExtracted:\n{extracted_responses[0]}",
-#     )
-#     return [2.0 if r == a else 0.0 for r, a in zip(extracted_responses, answer)]
-
-
-# def int_reward_func(completions, **kwargs) -> list[float]:
-#     responses = [completion[0]["content"] for completion in completions]
-#     extracted_responses = [extract_xml_answer(r) for r in responses]
-#     return [0.5 if r.isdigit() else 0.0 for r in extracted_responses]
-
-
-# def strict_format_reward_func(completions, **kwargs) -> list[float]:
-#     """Reward function that checks if the completion has a specific format."""
-#     pattern = r"^<reasoning>\n.*?\n</reasoning>\n<answer>\n.*?\n</answer>\n$"
-#     responses = [completion[0]["content"] for completion in completions]
-#     matches = [re.match(pattern, r) for r in responses]
-#     return [0.5 if match else 0.0 for match in matches]
-
-
-# def soft_format_reward_func(completions, **kwargs) -> list[float]:
-#     """Reward function that checks if the completion has a specific format."""
-#     pattern = r"<reasoning>.*?</reasoning>\s*<answer>.*?</answer>"
-#     responses = [completion[0]["content"] for completion in completions]
-#     matches = [re.match(pattern, r) for r in responses]
-#     return [0.5 if match else 0.0 for match in matches]
-
-
-# def count_xml(text) -> float:
-#     count = 0.0
-#     if text.count("<reasoning>\n") == 1:
-#         count += 0.125
-#     if text.count("\n</reasoning>\n") == 1:
-#         count += 0.125
-#     if text.count("\n<answer>\n") == 1:
-#         count += 0.125
-#         count -= len(text.split("\n</answer>\n")[-1]) * 0.001
-#     if text.count("\n</answer>") == 1:
-#         count += 0.125
-#         count -= (len(text.split("\n</answer>")[-1]) - 1) * 0.001
-#     return count
-
-
-# def xmlcount_reward_func(completions, **kwargs) -> list[float]:
-#     contents = [completion[0]["content"] for completion in completions]
-#     return [count_xml(c) for c in contents]
+reward_funcs = [
+    # to_trl(MathVerifyReward(MathVerifyRewardConfig(valid_expression_reward=0.5))),
+    # to_trl(ThinkingFormatReward(ThinkingFormatRewardConfig())),
+    to_trl(
+        CompositeReward(
+            CompositeRewardConfig(
+                mode="sum",
+                rewards=[
+                    MathVerifyRewardConfig(valid_expression_reward=0.5),
+                    ThinkingFormatRewardConfig(),
+                ],
+            )
+        )
+    ),
+]
 
 
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
@@ -160,13 +122,16 @@ training_args = GRPOConfig(
     warmup_ratio=0.1,
     lr_scheduler_type="cosine",
     logging_steps=1,
+    eval_strategy="steps",
+    eval_steps=1,
+    eval_dataset=eval_dataset,
     bf16=True,
     per_device_train_batch_size=1,
     gradient_accumulation_steps=16,
     num_generations=8,
     max_prompt_length=256,
     max_completion_length=300,
-    num_train_epochs=2,
+    num_train_epochs=4,
     save_steps=100,
     max_grad_norm=0.1,
     report_to="wandb",
@@ -202,15 +167,10 @@ tokenizer.pad_token = tokenizer.eos_token
 trainer = GRPOTrainer(
     model=model,
     processing_class=tokenizer,
-    reward_funcs=[
-        # xmlcount_reward_func,
-        soft_format_reward_func,
-        strict_format_reward_func,
-        # int_reward_func,
-        correctness_reward_func,
-    ],
+    reward_funcs=reward_funcs,
     args=training_args,
     train_dataset=dataset,
+    eval_dataset=eval_dataset,
     peft_config=peft_config,
 )
 trainer.train()

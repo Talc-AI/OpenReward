@@ -22,7 +22,7 @@ class ThinkingFormatReward(Reward):
         super().__init__(config)
 
         if config.override_regex is None:
-            override_regex = r"<thinking>(.*?)</thinking><answer>(.*?)</answer>"
+            override_regex = r"<thinking>(.*?)</thinking>\s*<answer>(.*?)</answer>"
         else:
             override_regex = config.override_regex
 

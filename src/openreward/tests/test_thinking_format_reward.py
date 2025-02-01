@@ -27,6 +27,19 @@ class TestThinkingFormatReward(unittest.TestCase):
         )
         self.assertEqual(reward(chat), 1.0)
 
+    def test_format_with_whitespace(self):
+        reward = ThinkingFormatReward(self.default_config)
+        chat = Chat(
+            messages=[
+                ChatCompletion(role="user", content="What is the capital of France?"),
+                ChatCompletion(
+                    role="assistant",
+                    content="<thinking>Let me think...</thinking>\r\n<answer>Paris</answer>",
+                ),
+            ]
+        )
+        self.assertEqual(reward(chat), 1.0)
+
     def test_default_format_no_match(self):
         reward = ThinkingFormatReward(self.default_config)
         chat = Chat(

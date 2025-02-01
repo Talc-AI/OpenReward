@@ -27,8 +27,8 @@ class MathVerifyReward(Reward):
         super().__init__(config)
 
         if config.extraction_regex is None:
-            # Extract between the last set of <answer> and </answer> tags
-            extraction_regex = r"<answer>(.*?)</answer>"
+            # Extract between the last set of <answer> and </answer> tags, allowing for newlines in the answer
+            extraction_regex = r"<answer>([\s\S]*?)</answer>"
         else:
             extraction_regex = config.extraction_regex
 
@@ -38,14 +38,29 @@ class MathVerifyReward(Reward):
         """Returns a reward of 1 if the text is a valid mathematical expression, valid_expression_reward (default 0) if there is a valid mathematical expression that is not correct, and 0 if there is no valid expression returned. Returns None to pass if the last message in the chat is not from the assistant."""
         chat: Chat = parse_chat(chat)
 
-        if len(chat.messages) < 2 or chat.messages[-1].role != "assistant":
+        ground_truth = chat.metadata.ground_truth
+
+        if (
+            len(chat.messages) < 2
+            or chat.messages[-1].role != "assistant"
+            or not ground_truth
+        ):
             return None
 
-        text = chat.messages[-1].content
-        answer = self._regex.findall(text)[-1]
-
         try:
+            text = chat.messages[-1].content
+            answer = self._regex.findall(text)[-1]
             parsed = parse(answer)
-        except:
+            ground_truth = parse(str(ground_truth))
+        except Exception as e:
             return 0.0
-        return 1.0 if verify(parsed) else self.config.valid_expression_reward
+
+        if len(ground_truth) == 0:
+            return None
+
+        if len(parsed) == 0:
+            return 0.0
+
+        return (
+            1.0 if verify(ground_truth, parsed) else self.config.valid_expression_reward
+        )

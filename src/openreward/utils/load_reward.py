@@ -11,7 +11,8 @@ import openreward.rewards.composite_reward as composite_reward  # Can't import C
 
 def create_reward(config: any) -> Reward:
 
-    config = RewardConfig(**config)
+    if isinstance(config, dict):
+        config = RewardConfig(**config)
 
     """Creates a reward object based on the configuration."""
     if config.type == "MathVerify":
