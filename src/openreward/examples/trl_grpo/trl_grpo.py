@@ -101,16 +101,9 @@ reward_funcs = [
 
 
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
-# model_name = "Qwen/Qwen2.5-1.5B-Instruct"
-# model_name = "allenai/OLMo-1B-hf"
-# model_name = "Qwen/Qwen2-0.5B-Instruct"
 
-if "Llama" in model_name:
-    output_dir = "outputs/Llama-1B-GRPO"
-    run_name = "Llama-1B-GRPO-gsm8k"
-else:
-    output_dir = "outputs/Qwen-1.5B-GRPO"
-    run_name = "Qwen-1.5B-GRPO-gsm8k"
+output_dir = "/models/Llama-1B-GRPO"
+run_name = "Llama-1B-GRPO-gsm8k"
 
 training_args = GRPOConfig(
     output_dir=output_dir,
@@ -122,36 +115,18 @@ training_args = GRPOConfig(
     warmup_ratio=0.1,
     lr_scheduler_type="cosine",
     logging_steps=1,
-    eval_strategy="steps",
-    eval_steps=1,
-    eval_dataset=eval_dataset,
     bf16=True,
     per_device_train_batch_size=1,
     gradient_accumulation_steps=16,
-    num_generations=8,
+    num_generations=4,
     max_prompt_length=256,
-    max_completion_length=300,
+    max_completion_length=256,
     num_train_epochs=4,
-    save_steps=100,
+    save_strategy="epoch",
     max_grad_norm=0.1,
     report_to="wandb",
     log_on_each_node=False,
     # use_vllm=True,
-)
-peft_config = LoraConfig(
-    r=16,
-    lora_alpha=64,
-    target_modules=[
-        "q_proj",
-        "k_proj",
-        "v_proj",
-        "o_proj",
-        "up_proj",
-        "down_proj",
-        "gate_proj",
-    ],
-    task_type="CAUSAL_LM",
-    lora_dropout=0.05,
 )
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
@@ -170,7 +145,5 @@ trainer = GRPOTrainer(
     reward_funcs=reward_funcs,
     args=training_args,
     train_dataset=dataset,
-    eval_dataset=eval_dataset,
-    peft_config=peft_config,
 )
 trainer.train()

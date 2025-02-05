@@ -41,14 +41,14 @@ def to_trl(
 
         rewards = [reward if reward is not None else 0.0 for reward in rewards]
 
-        for i in range(len(rewards)):
-            print(
-                "-" * 20,
-                f"Prompt:\n{prompts[i]}",
-                f"\nAnswer:\n{answer[i]}",
-                f"\nResponse:\n{responses[i]}",
-                f"\nReward:\n{rewards[i]}",
-            )
+        # for i in range(len(rewards)):
+        #     print(
+        #         "-" * 20,
+        #         f"Prompt:\n{prompts[i]}",
+        #         f"\nAnswer:\n{answer[i]}",
+        #         f"\nResponse:\n{responses[i]}",
+        #         f"\nReward:\n{rewards[i]}",
+        #     )
 
         return rewards
 

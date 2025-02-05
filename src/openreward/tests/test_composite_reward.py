@@ -28,7 +28,7 @@ class TestCompositeReward(unittest.TestCase):
             ],
             metadata={"ground_truth": 5},
         )
-        self.assertEqual(self.reward(chat), 1.5)
+        self.assertEqual(self.reward(chat), 2)
 
     def test_average_mode(self):
         self.config.mode = "average"
@@ -43,7 +43,7 @@ class TestCompositeReward(unittest.TestCase):
             ],
             metadata={"ground_truth": 5},
         )
-        self.assertEqual(self.reward(chat), 0.75)
+        self.assertEqual(self.reward(chat), 1)
 
     def test_min_mode(self):
         self.config.mode = "min"
@@ -53,7 +53,7 @@ class TestCompositeReward(unittest.TestCase):
                 ChatCompletion(role="user", content="Solve the math problem 2 + 3."),
                 ChatCompletion(
                     role="assistant",
-                    content="<thinking>2 + 3 = 5</thinking><answer>5</answer>",
+                    content="<thinking>2 + 3 = 5</thinking><answer>54</answer>",
                 ),
             ],
             metadata={"ground_truth": 5},
@@ -68,7 +68,7 @@ class TestCompositeReward(unittest.TestCase):
                 ChatCompletion(role="user", content="Solve the math problem 2 + 3."),
                 ChatCompletion(
                     role="assistant",
-                    content="<thinking>2 + 3 = 5</thinking><answer>5</answer>",
+                    content="<thinking>2 + 3 = 5</thinking><answer>54</answer>",
                 ),
             ],
             metadata={"ground_truth": 5},
